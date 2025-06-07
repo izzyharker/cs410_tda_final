@@ -17,7 +17,7 @@ def load_jokers(filename) -> dict:
     with open(filename, "r") as jk:
         lines = jk.readlines()
 
-        print(lines[0])
+        # print(lines[0])
 
         for line in lines[1:]:
             # print(line)
@@ -31,9 +31,34 @@ def load_jokers(filename) -> dict:
     return jokers
 
 jokers = load_jokers("jokers.csv")
-print(jokers["Blueprint"])
 
-def create_edges(jokers: dict):
-    for k, v in jokers.items():
-        # do something
-        pass
+def create_edge_matrix(jokers: dict):
+    num_traits = len(metrics) - 1
+    node_order = []
+
+    for k in jokers:
+        node_order.append(k)
+
+    num_jokers = len(node_order)
+    edge_matrix = [[0 for _ in range(num_jokers)] for _ in range(num_jokers)]
+
+    edge_dict = {0: []}
+
+    for i in range(num_jokers):
+        for j in range(i+1, num_jokers):
+            distance = hamming_distance(jokers[node_order[i]], jokers[node_order[j]])  
+            if distance in edge_dict.keys():
+                edge_dict[distance].append((node_order[i], node_order[j]))
+            else:
+                edge_dict[distance] = [(node_order[i], node_order[j])]
+
+    return edge_dict, node_order
+
+# jokers = {"Blueprint": [0, 1], "Gros Michel": [0, 1], "8Ball": [1, 1]}
+
+edge_dict, joker_order = create_edge_matrix(jokers)  
+
+with open("test.csv", "w") as f:
+    for k, v in edge_dict.items():
+        print(f"{k}: {v}", file=f)
+f.close()
